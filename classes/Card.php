@@ -30,6 +30,12 @@ class Card
     {
         return $this->value;
     }
+    
+    public function setValue($value)
+    {
+        $this->value = $value;
+        return $this;
+    }
 
     public function getSuite()
     {

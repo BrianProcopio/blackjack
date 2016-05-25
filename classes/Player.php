@@ -37,10 +37,22 @@ class Player
 
     public function getTotal()
     {
+        $converted = false;
         $total = 0;
 
         foreach ($this->getCards() as $card) {
             $total += $card->getValue();
+        }
+
+        if ($total > 21) {
+            for ($i = 0; $i < count($this->cards) && !$converted; $i++) {
+                $card = $this->cards[$i];
+                if ($card->getValue() === 11) {
+                    $total -= 10;
+                    $card->setValue(1);
+                    $converted = true;
+                }
+            }
         }
 
         return $total;
