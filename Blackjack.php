@@ -29,7 +29,7 @@ echo "Great. Let's play!\n\n";
 $dealer = new classes\Dealer();
 $endGame = false;
 
-if ($dealer->getTotal() === 21 && count($dealer->getCards()) === 2) {
+if ($dealer->getBestHand() === 21 && count($dealer->getCards()) === 2) {
     echo "That was quick!\n";
     $dealer->showHand();
     $endGame = true;
@@ -38,7 +38,7 @@ if ($dealer->getTotal() === 21 && count($dealer->getCards()) === 2) {
 $player = new classes\Player($playerName);
 $player->addCards(2);
 $player->showHand();
-$playerTotal = $player->getTotal();
+$playerTotal = $player->getBestHand();
 
 while ($playerTotal < 21 && !$endGame) {
     $dealerCard = array_values($dealer->getCards())[0];
@@ -47,15 +47,18 @@ while ($playerTotal < 21 && !$endGame) {
     $action = fgets($actionHandle);
     $action = trim(strtolower($action));
     if ($action != 'hit' && $action != 'h') {
-        $push = $dealer->getTotal() === $player->getTotal();
-        $winner = $dealer->getTotal() > 21 || $player->getTotal() > $dealer->getTotal();
+        $winner = ($player->getBestHand() > $dealer->getBestHand()) || $dealer->getBestHand() > 21;
         echo "\n";
         $dealer->showHand();
         $endGame = true;
-        echo $push ? "Push.\n\n" : $winner ? "Congratulation!\n\n" : "Better luck next time.\n\n";
+        if ($dealer->getBestHand() == $player->getBestHand()) {
+            echo "It's a Push.\n\n";
+        } else {
+            echo $winner ? "You win! Congratulation!!\n\n" : "Better luck next time.\n\n";
+        }
     } else {
         $player->addCards();
-        $playerTotal = $player->getTotal();
+        $playerTotal = $player->getBestHand();
         echo "\n";
         $player->showHand();
     }

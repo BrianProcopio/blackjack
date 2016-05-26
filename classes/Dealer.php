@@ -22,39 +22,65 @@ class Dealer
         return $this->cards;
     }
     
-    public function getTotal()
+    public function getTotals()
     {
-        $total = 0;
-        $converted = false;
-        
+        $totals = array();
+        $nonAceTotal = 0;
+        $aces = 0;
+
         foreach ($this->getCards() as $card) {
-            $total += $card->getValue();
+            if ($card->getValue() !== 11) {
+                $nonAceTotal += $card->getValue();
+            } else {
+                $aces++;
+            }
         }
 
-        if ($total > 21) {
-            for ($i = 0; $i < count($this->cards) && !$converted; $i++) {
-                $card = $this->cards[$i];
-                if ($card->getValue() === 11) {
-                    $total -= 10;
-                    $card->setValue(1);
-                    $converted = true;
+        if ($aces === 0) {
+            $totals[] = $nonAceTotal;
+        }
+
+        for ($i = 0; $i < $aces; $i++) {
+            $totals[] = $nonAceTotal + 11;
+            $totals[] = $nonAceTotal + 1;
+        }
+
+        return $totals;
+    }
+
+    public function getBestHand()
+    {
+        $bestHand = 0;
+
+        foreach ($this->getTotals() as $total) {
+            $div21 = $total / 21;
+            if ($div21 >= $bestHand && $div21 <= 1) {
+                $bestHand = $total;
+            }
+        }
+
+        if ($bestHand === 0) {
+            foreach ($this->getTotals() as $total) {
+                $div21 = $total / 21;
+                if ($bestHand === 0 || ($div21 <= $bestHand && $div21 > 1)) {
+                    $bestHand = $total;
                 }
             }
         }
-        
-        return $total;
+
+        return $bestHand;
     }
     
     public function showHand()
     {
-        $total = $this->getTotal();
-
-        if (count($this->cards) === 2 && $total === 21) {
+        $bestHand = $this->getBestHand();
+        
+        if (count($this->cards) === 2 && $bestHand === 21) {
             echo "Dealer has Blackjack!";
-        } else if ($total > 21) {
-            echo "Dealer busts!";
+        } else if ($bestHand > 21) {
+            echo "Dealer busts with $bestHand!";
         } else {
-            echo "Dealer has $total.";
+            echo "Dealer has $bestHand.";
         }
         
         echo "\n";
@@ -72,7 +98,7 @@ class Dealer
             $this->addCards(2);
         }
         
-        while ($this->getTotal() < 17) {
+        while ($this->getBestHand() < 17) {
             $this->addCards();
         }
         
